@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "dwarves",
+  "version": "${version}",
+
+  "name": "Dwarves",
+  "description": "You're not alone anymore.",
+  "authors": [
+    "MooseOnTheRocks"
+  ],
+  "contact": {
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/dwarves/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.foltz.dwarves.DwarvesMod"
+    ],
+    "client": [
+      "dev.foltz.dwarves.client.DwarvesModClient"
+    ]
+  },
+  "mixins": [
+    "modid.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
