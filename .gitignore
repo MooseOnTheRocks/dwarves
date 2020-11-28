@@ -1,3 +1,26 @@
-.gradle/
-build/
-run/
+# Compiled junk
+*/build
+/build
+/bin
+*/bin
+/.gradle
+*/.gradle
+/minecraft
+*/minecraft
+/out
+*/run
+*/out
+/run
+/classes
+logs/
+
+# IDE junk
+.classpath
+.project
+.metadata
+.settings
+*.launch
+*.iml
+.idea
+*.ipr
+*.iws
