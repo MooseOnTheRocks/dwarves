@@ -1,5 +1,6 @@
 package dev.foltz.dwarves.world;
 
+import dev.foltz.dwarves.entity.ai.task.Task;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.BlockPos;
@@ -34,6 +35,7 @@ public class DwarfGroup {
     public Optional<DwarfEntity> findIdleDwarf() {
         return dwarves.stream()
                 .filter(dwarf -> dwarf.isAlive())
+                .filter(dwarf -> dwarf.brain.taskSelector.interruptTask == Task.NONE)
                 .filter(dwarf -> dwarf.brain.taskSelector.runningTasks.isEmpty())
                 .findFirst();
     }

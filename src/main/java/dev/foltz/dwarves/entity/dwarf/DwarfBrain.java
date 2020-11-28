@@ -73,10 +73,9 @@ public class DwarfBrain {
         initDataTracker();
         taskSelector = new TaskSelector(dwarf);
         if (dwarf.world instanceof ServerWorld) {
-            PersistentStateManager stateManager = ((ServerWorld) dwarf.world).getPersistentStateManager();
-            System.out.println("I'm a dwarf getting some state info!");
-            DwarfGroupManager.getOrCreate((ServerWorld) dwarf.world)
-                    .findNearestDwarfGroup(dwarf.getBlockPos())
+            DwarfGroupManager groupManager = DwarfGroupManager.getOrCreate((ServerWorld) dwarf.world);
+            groupManager.createDwarfGroup(dwarf.getBlockPos());
+            groupManager.findNearestDwarfGroup(dwarf.getBlockPos())
                     .ifPresent(group -> {
                         System.out.println("Adding dwarf to group");
                         group.addDwarf(dwarf);
