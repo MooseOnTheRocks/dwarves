@@ -1,10 +1,7 @@
 package dev.foltz.dwarves.item;
 
 import dev.foltz.dwarves.DwarvesMod;
-import dev.foltz.dwarves.entity.ai.task.MineBlockTask;
-import dev.foltz.dwarves.entity.ai.task.PlaceBlockTask;
-import dev.foltz.dwarves.entity.ai.task.SequencedTask;
-import dev.foltz.dwarves.entity.ai.task.WalkToPositionTask;
+import dev.foltz.dwarves.entity.ai.task.*;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import dev.foltz.dwarves.world.DwarfGroup;
 import dev.foltz.dwarves.world.DwarfGroupManager;
@@ -22,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
+import javax.swing.*;
 import java.util.Optional;
 
 public class DwarfCommandItem extends Item {
@@ -108,6 +106,43 @@ public class DwarfCommandItem extends Item {
                                 new MineBlockTask(dwarf, world, blockPos)
                         ));
                         break;
+                    case MINE_VOLUME:
+                        BlockPos corner1 = null;
+                        BlockPos corner2 = null;
+                        final int r = 2;
+                        switch (context.getSide()) {
+                            case UP:
+                                System.out.println("UP");
+                                corner1 = blockPos.add(-r, 0, -r);
+                                corner2 = blockPos.add(r, -2 * r, r);
+                                break;
+                            case DOWN:
+                                corner1 = blockPos.add(-r, 0, -r);
+                                corner2 = blockPos.add(r, 2 * r, r);
+                                break;
+                            // Negative Z
+                            case NORTH:
+                                corner1 = blockPos.add(-r, -r, 0);
+                                corner2 = blockPos.add(r, r, -2 * r);
+                                break;
+                            // Positive Z
+                            case SOUTH:
+                                corner1 = blockPos.add(-r, -r, 0);
+                                corner2 = blockPos.add(r, r, 2 * r);
+                                break;
+                            // Positive X
+                            case EAST:
+                                corner1 = blockPos.add(0, -r, -r);
+                                corner2 = blockPos.add(-2 * r, r, r);
+                                break;
+                            // Negative X
+                            case WEST:
+                                corner1 = blockPos.add(0, -r, -r);
+                                corner2 = blockPos.add(2 * r, r, r);
+                                break;
+                        }
+                        dwarf.brain.taskSelector.interrupt(new MineCubeVolumeTask(dwarf, world, corner1, corner2));
+                        break;
                 }
             });
         });
@@ -124,6 +159,8 @@ public class DwarfCommandItem extends Item {
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "place_block"));
             case BREAK_BLOCK:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "break_block"));
+            case MINE_VOLUME:
+                return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "mine_volume"));
             case CREATE_GROUP:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "create_group"));
             default:
@@ -135,6 +172,7 @@ public class DwarfCommandItem extends Item {
         WALK,
         PLACE_BLOCK,
         BREAK_BLOCK,
+        MINE_VOLUME,
         CREATE_GROUP
     }
 }

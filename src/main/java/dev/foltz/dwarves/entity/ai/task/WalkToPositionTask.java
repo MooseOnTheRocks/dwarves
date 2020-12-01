@@ -36,5 +36,6 @@ public class WalkToPositionTask extends SequencedTask {
             subWalks[i] = new WalkTowardPositionTask(dwarf, dest);
         }
         this.setRemainingTasks(subWalks);
+        super.start();
     }
 }

@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 public abstract class Task {
     public static final Task NONE = new Task() {
-        public boolean shouldStart() { return false; }
+        public boolean shouldStart() { return true; }
         public void start() {}
         public void tick() {}
         public boolean shouldStop() { return true; }

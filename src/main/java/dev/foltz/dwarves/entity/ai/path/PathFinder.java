@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -29,7 +30,7 @@ public class PathFinder {
     }
 
     public Path computePath(BlockPos from, BlockPos to, World world, int range) {
-        if (from.equals(to)) {
+        if (from.isWithinDistance(new Vec3i(to.getX(), to.getY(), to.getZ()), range)) {
             return null;
         }
         final Queue<PathNode> unvisited = new PriorityQueue<>(Comparator.comparingInt(node -> node.weight));

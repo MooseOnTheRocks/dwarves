@@ -26,13 +26,14 @@ public class MineBlockTask extends Task {
 
     @Override
     public boolean shouldStart() {
-        return dwarf.getPos().isInRange(new Vec3d(blockPos.getX() + 0.5, blockPos.getY() - 0.5, blockPos.getZ() + 0.5), 3) && !world.getBlockState(blockPos).isAir();
+        return dwarf.getPos().isInRange(new Vec3d(blockPos.getX() + 0.5, blockPos.getY() - 0.5, blockPos.getZ() + 0.5), 3);
     }
 
     @Override
     public void start() {
         blockBreakingTick = 0;
         tryingTime = 0;
+        System.out.println("Attempting to mine " + blockPos);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class MineBlockTask extends Task {
             world.playSound(null, blockPos, SoundEvents.BLOCK_STONE_HIT, SoundCategory.BLOCKS, 1.0f, 1.0f);
             dwarf.swingHand(Hand.MAIN_HAND);
         }
-        blockBreakingTick++;
+        blockBreakingTick+=2;
         float blockToMineProgress = blockBreakingTick / 100.0f;
         world.setBlockBreakingInfo(dwarf.getEntityId(), blockPos, (int) (blockToMineProgress * 10));
     }
@@ -59,7 +60,8 @@ public class MineBlockTask extends Task {
         if (blockBreakingTick >= 100) {
             dwarf.world.breakBlock(blockPos, true, dwarf);
             dwarf.world.playSound(null, blockPos, SoundEvents.BLOCK_STONE_BREAK, SoundCategory.BLOCKS, 1.0f, 1.0f);
-            dwarf.getMainHandStack().damage(1, dwarf, (idiot) -> {
+            // Infinite durability for now
+            dwarf.getMainHandStack().damage(0, dwarf, (idiot) -> {
                 dwarf.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND);
             });
         }

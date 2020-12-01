@@ -6,6 +6,7 @@
     "dwarfcommand.dwarves.walk": "Walk",
     "dwarfcommand.dwarves.place_block": "Place Block",
     "dwarfcommand.dwarves.break_block": "Break Block",
+    "dwarfcommand.dwarves.mine_volume": "Mine Volume",
     "dwarfcommand.dwarves.create_group": "Create Group",
     "dwarfcommand.dwarves.invalid": "Invalid Command"
 }
