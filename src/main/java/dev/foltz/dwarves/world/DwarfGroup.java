@@ -35,8 +35,7 @@ public class DwarfGroup {
     public Optional<DwarfEntity> findIdleDwarf() {
         return dwarves.stream()
                 .filter(dwarf -> dwarf.isAlive())
-                .filter(dwarf -> dwarf.brain.taskSelector.interruptTask == Task.NONE)
-                .filter(dwarf -> dwarf.brain.taskSelector.runningTasks.isEmpty())
+                .filter(dwarf -> dwarf.brain.taskSelector.currentTask == Task.NONE)
                 .findFirst();
     }
 }

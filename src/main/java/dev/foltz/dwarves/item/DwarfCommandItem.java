@@ -1,12 +1,10 @@
 package dev.foltz.dwarves.item;
 
 import dev.foltz.dwarves.DwarvesMod;
-import dev.foltz.dwarves.entity.ai.path.PathFinder;
 import dev.foltz.dwarves.entity.ai.task.MineBlockTask;
 import dev.foltz.dwarves.entity.ai.task.PlaceBlockTask;
-import dev.foltz.dwarves.entity.ai.task.Task;
-import dev.foltz.dwarves.entity.ai.task.WalkAlongPathTask;
-import dev.foltz.dwarves.entity.ai.task.interrupt.Interrupt;
+import dev.foltz.dwarves.entity.ai.task.SequencedTask;
+import dev.foltz.dwarves.entity.ai.task.WalkToPositionTask;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import dev.foltz.dwarves.world.DwarfGroup;
 import dev.foltz.dwarves.world.DwarfGroupManager;
@@ -19,7 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -94,25 +91,25 @@ public class DwarfCommandItem extends Item {
         dwarfGroupManager.findNearestDwarfGroup(blockPos).ifPresent((dwarfGroup) -> {
             System.out.println("Found one!");
             Optional<DwarfEntity> maybeDwarf = dwarfGroup.findIdleDwarf();
-            maybeDwarf.ifPresent(dwarf -> dwarf.brain.taskSelector.interrupt(new Interrupt() {
-                @Override
-                public Task resolve(DwarfEntity dwarfEntity) {
-                    System.out.println("Interrupting idle dwarf!");
-                    System.out.println("Dwarf current runningTasks:");
-                    System.out.println(dwarf.brain.taskSelector.runningTasks);
-                    switch (command) {
-                        case WALK:
-                            return new WalkAlongPathTask(dwarf, world,
-                                    new PathFinder(24).computePath(dwarf.getBlockPos(), blockPos.up(), world, 0));
-                        case PLACE_BLOCK:
-                            return new PlaceBlockTask(dwarf, world, blockPos.offset(context.getSide()), Blocks.COBBLESTONE.getDefaultState());
-                        case BREAK_BLOCK:
-                            return new MineBlockTask(dwarf, world, blockPos);
-                        default:
-                            return Task.NONE;
-                    }
+            maybeDwarf.ifPresent(dwarf -> {
+                switch (command) {
+                    case WALK:
+                        dwarf.brain.taskSelector.interrupt(new WalkToPositionTask(dwarf, blockPos.up()));
+                        break;
+                    case PLACE_BLOCK:
+                        dwarf.brain.taskSelector.interrupt(new SequencedTask(
+                                new WalkToPositionTask(dwarf, blockPos.offset(context.getSide())),
+                                new PlaceBlockTask(dwarf, world, blockPos, Blocks.COBBLESTONE.getDefaultState())
+                        ));
+                        break;
+                    case BREAK_BLOCK:
+                        dwarf.brain.taskSelector.interrupt(new SequencedTask(
+                                new WalkToPositionTask(dwarf, blockPos.up()),
+                                new MineBlockTask(dwarf, world, blockPos)
+                        ));
+                        break;
                 }
-            }));
+            });
         });
 
         return ActionResult.SUCCESS;

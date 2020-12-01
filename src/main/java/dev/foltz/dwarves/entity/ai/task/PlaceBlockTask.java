@@ -19,7 +19,6 @@ public class PlaceBlockTask extends Task {
     public BlockState blockState;
 
     public PlaceBlockTask(DwarfEntity dwarf, World world, BlockPos blockPosToPlace, BlockState blockStateToPlace) {
-        super(EnumSet.of(EntityControlType.LOOK, EntityControlType.MOVE, EntityControlType.HANDS));
         this.dwarf = dwarf;
         this.world = world;
         this.blockPos = blockPosToPlace;

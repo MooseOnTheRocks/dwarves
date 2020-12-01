@@ -1,27 +1,15 @@
 package dev.foltz.dwarves;
 
-import dev.foltz.dwarves.entity.ai.path.Path;
-import dev.foltz.dwarves.entity.ai.path.PathFinder;
-import dev.foltz.dwarves.entity.ai.task.Task;
-import dev.foltz.dwarves.entity.ai.task.WalkAlongPathTask;
-import dev.foltz.dwarves.entity.ai.task.interrupt.Interrupt;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import dev.foltz.dwarves.item.DwarfCommandItem;
-import dev.foltz.dwarves.world.DwarfGroupManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.*;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-
-import java.util.List;
 
 public class DwarvesMod implements ModInitializer {
 	public static final String MODID = "dwarves";

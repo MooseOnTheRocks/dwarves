@@ -2,6 +2,7 @@ package dev.foltz.dwarves.entity.ai.path;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +29,9 @@ public class PathFinder {
     }
 
     public Path computePath(BlockPos from, BlockPos to, World world, int range) {
+        if (from.equals(to)) {
+            return null;
+        }
         final Queue<PathNode> unvisited = new PriorityQueue<>(Comparator.comparingInt(node -> node.weight));
         final Set<PathNode> visited = new TreeSet<>(PathFinder::comparePathNodes);
         final PathNode origin = new PathNode(PathNode.PathNodeType.WALK_TO, from, null, 0);
@@ -35,6 +39,11 @@ public class PathFinder {
         visitNode(origin, from, to, pos -> isValidPos(world, pos), unvisited, visited);
         while (!unvisited.isEmpty()) {
             PathNode node = unvisited.remove();
+            if (node.weight <= range) {
+                System.out.println("Found nearby path!");
+                destination = node;
+                break;
+            }
             if (node.blockPos.equals(to)) {
                 System.out.println("Found a direct path!");
                 destination = node;

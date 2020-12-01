@@ -1,6 +1,7 @@
 package dev.foltz.dwarves.entity.dwarf;
 
 import dev.foltz.dwarves.DwarvesMod;
+import dev.foltz.dwarves.world.DwarfGroupManager;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -14,10 +15,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.Arrays;
 
@@ -37,6 +40,14 @@ public class DwarfEntity extends MobEntity {
         this.setCanPickUpLoot(true);
         Arrays.fill(handDropChances, 1.0f);
         Arrays.fill(armorDropChances, 1.0f);
+
+        if (!world.isClient) {
+            if (world instanceof ServerWorld) {
+                DwarfGroupManager.getOrCreate((ServerWorld) world)
+                        .findNearestDwarfGroup(getBlockPos())
+                        .ifPresent(group -> group.addDwarf(this));
+            }
+        }
     }
 
     @Override
@@ -57,7 +68,6 @@ public class DwarfEntity extends MobEntity {
 
     @Override
     protected void loot(ItemEntity item) {
-        brain.loot(item);
     }
 
     @Override
@@ -89,7 +99,7 @@ public class DwarfEntity extends MobEntity {
 
     @Override
     protected ActionResult interactMob(PlayerEntity player, Hand hand) {
-        return brain.playerInteract(player, hand);
+        return ActionResult.PASS;
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.EnumSet;
@@ -18,7 +19,6 @@ public class MineBlockTask extends Task {
     int tryingTime;
 
     public MineBlockTask(DwarfEntity dwarf, World world, BlockPos blockToMine) {
-        super(EnumSet.of(EntityControlType.MOVE, EntityControlType.LOOK, EntityControlType.HANDS));
         this.dwarf = dwarf;
         this.world = world;
         this.blockPos = blockToMine;
@@ -26,15 +26,13 @@ public class MineBlockTask extends Task {
 
     @Override
     public boolean shouldStart() {
-        System.out.println("should I mine?");
-        return !world.getBlockState(blockPos).isAir();
+        return dwarf.getPos().isInRange(new Vec3d(blockPos.getX() + 0.5, blockPos.getY() - 0.5, blockPos.getZ() + 0.5), 3) && !world.getBlockState(blockPos).isAir();
     }
 
     @Override
     public void start() {
-        blockBreakingTick = -5;
+        blockBreakingTick = 0;
         tryingTime = 0;
-        System.out.println("Tryna mine here");
     }
 
     @Override

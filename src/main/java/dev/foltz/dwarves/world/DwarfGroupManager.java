@@ -18,7 +18,6 @@ public class DwarfGroupManager extends PersistentState {
     public static final int DWARF_GROUP_RANGE = 64;
     private static final String KEY_DWARF_GROUP_COUNT = "DWARF_GROUP_COUNT";
 
-
     public ServerWorld world;
     public Set<DwarfGroup> dwarfGroups;
 

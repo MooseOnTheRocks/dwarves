@@ -9,6 +9,7 @@ import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -39,7 +40,7 @@ public class PathRenderer {
         Box box = player.getBoundingBox().expand(20);
         List<DwarfEntity> nearbyDwarves = world.getEntitiesByClass(DwarfEntity.class, box, entity -> true);
         nearbyDwarves.forEach(dwarf -> {
-            Path path = dwarf.brain.currentPath;
+            Path path = null;//dwarf.brain.currentPath;
             if (path != null) {
                 for (PathNode node : path.pathNodes) {
                     BlockPos pos = node.blockPos;

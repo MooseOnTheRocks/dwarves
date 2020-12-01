@@ -35,7 +35,7 @@ public class DwarvesModClient implements ClientModInitializer {
                 PlayerEntity player = context.getPlayer();
                 World world = player.world;
                 DwarfEntity dwarf = (DwarfEntity) world.getEntityById(entityId);
-                dwarf.brain.setPath(path);
+//                dwarf.brain.setPath(path);
             });
         });
 

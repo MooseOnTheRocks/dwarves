@@ -160,7 +160,7 @@ public class DwarfEntityModel extends BipedEntityModel<DwarfEntity> {
 
         setSwingArmAngles(dwarf, animationProgress);
 
-        boolean isAdmiring = dwarf.getDataTracker().get(DwarfBrain.ADMIRING);
+        boolean isAdmiring = false;//dwarf.getDataTracker().get(DwarfBrain.ADMIRING);
 //        System.out.println("Renderer, dwarf.isAdmiring: " + isAdmiring + ", " + dwarf.getOffHandStack());
         if (isAdmiring) {
             this.head.pitch = 0.5F;
