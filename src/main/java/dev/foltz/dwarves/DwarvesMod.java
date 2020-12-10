@@ -1,5 +1,6 @@
 package dev.foltz.dwarves;
 
+import dev.foltz.dwarves.entity.path.TrackedPathHandler;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import dev.foltz.dwarves.item.DwarfCommandItem;
 import net.fabricmc.api.ModInitializer;
@@ -7,6 +8,7 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.*;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.item.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -34,11 +36,14 @@ public class DwarvesMod implements ModInitializer {
 //	public static final ScreenHandlerType<DwarfTradesScreenHandler> DWARF_TRADES_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(MODID, "dwarf_trades_screen_handler"), DwarfTradesScreenHandler::new);
 //	public static final ScreenHandlerType<DwarfInventoryScreenHandler> DWARF_INVENTORY_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(MODID, "dwarf_inventory_screen_handler"), DwarfInventoryScreenHandler::new);
 
+	public static final TrackedPathHandler DWARF_TRACKED_PATH_HANDLER = new TrackedPathHandler();
+
 	@Override
 	public void onInitialize() {
 		System.out.println("Hello, Moose!!!!");
 		Registry.register(Registry.ITEM, new Identifier(MODID, "moose_stick"), MOOSE_STICK);
 		Registry.register(Registry.ITEM, new Identifier(MODID, "dwarf_spawn_egg"), DWARF_SPAWN_EGG);
+		TrackedDataHandlerRegistry.register(DWARF_TRACKED_PATH_HANDLER);
 		FabricDefaultAttributeRegistry.register(DWARF, DwarfEntity.createDwarfAttributes());
 	}
 }

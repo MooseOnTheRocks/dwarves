@@ -1,9 +1,7 @@
-package dev.foltz.dwarves.entity.ai.path;
+package dev.foltz.dwarves.entity.path;
 
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.*;
 
@@ -20,12 +18,12 @@ public class Path implements Iterator<PathNode> {
     protected Path(List<PathNode> pathNodes) {
         this.pathNodes = pathNodes;
         pathNodeIndex = 0;
-        from = pathNodes.get(0).blockPos;
-        to = pathNodes.get(pathNodes.size() - 1).blockPos;
+        from = pathNodes.get(0).pos;
+        to = pathNodes.get(pathNodes.size() - 1).pos;
     }
 
     public boolean contains(BlockPos blockPos) {
-        return pathNodes.stream().anyMatch(node -> node.blockPos.equals(blockPos));
+        return pathNodes.stream().anyMatch(node -> node.pos.equals(blockPos));
     }
 
     @Override
@@ -46,7 +44,7 @@ public class Path implements Iterator<PathNode> {
         }
     }
 
-    public static Path read(PacketByteBuf data) {
+    public static Path readStatic(PacketByteBuf data) {
         int length = data.readInt();
         List<PathNode> nodes = new ArrayList<>();
         PathNode parent = null;

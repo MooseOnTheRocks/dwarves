@@ -1,7 +1,7 @@
 package dev.foltz.dwarves.item;
 
 import dev.foltz.dwarves.DwarvesMod;
-import dev.foltz.dwarves.entity.ai.task.*;
+import dev.foltz.dwarves.entity.task.*;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import dev.foltz.dwarves.world.DwarfGroup;
 import dev.foltz.dwarves.world.DwarfGroupManager;
@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
-import javax.swing.*;
 import java.util.Optional;
 
 public class DwarfCommandItem extends Item {
@@ -37,6 +36,7 @@ public class DwarfCommandItem extends Item {
             return Command.values()[tag.getInt("DwarfCommand")];
         }
         else {
+            tag.putInt("DwarfCommand", 0);
             return Command.WALK;
         }
     }
@@ -56,6 +56,7 @@ public class DwarfCommandItem extends Item {
                 nextCommand = Command.values()[next];
             }
             setCommand(itemStack, nextCommand);
+            return TypedActionResult.consume(itemStack);
         }
         return super.use(world, user, hand);
     }
@@ -73,10 +74,10 @@ public class DwarfCommandItem extends Item {
         DwarfGroupManager dwarfGroupManager = DwarfGroupManager.getOrCreate((ServerWorld) context.getWorld());
         if (command == Command.CREATE_GROUP) {
             System.out.println("Creating group.");
-            dwarfGroupManager.createDwarfGroup(blockPos);
+            dwarfGroupManager.findOrCreateDwarfGroup(blockPos);
             Optional<DwarfGroup> maybeGroup = dwarfGroupManager.findNearestDwarfGroup(blockPos);
             maybeGroup.ifPresent(group -> {
-                world.getEntitiesByClass(DwarfEntity.class, new Box(blockPos).expand(64), dwarf -> true).stream()
+                world.getEntitiesByClass(DwarfEntity.class, new Box(blockPos).expand(32), dwarf -> true).stream()
                         .forEach(dwarf -> {
                             System.out.println("Adding dwarf!");
                             group.addDwarf(dwarf);
@@ -88,60 +89,30 @@ public class DwarfCommandItem extends Item {
         System.out.println("Attempting dispatch");
         dwarfGroupManager.findNearestDwarfGroup(blockPos).ifPresent((dwarfGroup) -> {
             System.out.println("Found one!");
-            Optional<DwarfEntity> maybeDwarf = dwarfGroup.findIdleDwarf();
+            Optional<DwarfEntity> maybeDwarf = dwarfGroup.findIdleDwarf(blockPos);
+            if (!maybeDwarf.isPresent()) maybeDwarf = dwarfGroup.findNearestDwarf(blockPos);
             maybeDwarf.ifPresent(dwarf -> {
                 switch (command) {
                     case WALK:
-                        dwarf.brain.taskSelector.interrupt(new WalkToPositionTask(dwarf, blockPos.up()));
-                        break;
-                    case PLACE_BLOCK:
-                        dwarf.brain.taskSelector.interrupt(new SequencedTask(
-                                new WalkToPositionTask(dwarf, blockPos.offset(context.getSide())),
-                                new PlaceBlockTask(dwarf, world, blockPos, Blocks.COBBLESTONE.getDefaultState())
-                        ));
+                        dwarf.brain.taskManager.interrupt(new WalkToPositionTask(dwarf, blockPos.up(), 0, 1));
                         break;
                     case BREAK_BLOCK:
-                        dwarf.brain.taskSelector.interrupt(new SequencedTask(
-                                new WalkToPositionTask(dwarf, blockPos.up()),
-                                new MineBlockTask(dwarf, world, blockPos)
+                        System.out.println("BREAK BLOCK");
+                        dwarf.brain.taskManager.interrupt(TaskComposer.sequence(
+                                new WalkToPositionTask(dwarf, blockPos,2, 1),
+                                new MineBlockTask(dwarf, blockPos)
                         ));
                         break;
-                    case MINE_VOLUME:
-                        BlockPos corner1 = null;
-                        BlockPos corner2 = null;
-                        final int r = 2;
-                        switch (context.getSide()) {
-                            case UP:
-                                System.out.println("UP");
-                                corner1 = blockPos.add(-r, 0, -r);
-                                corner2 = blockPos.add(r, -2 * r, r);
-                                break;
-                            case DOWN:
-                                corner1 = blockPos.add(-r, 0, -r);
-                                corner2 = blockPos.add(r, 2 * r, r);
-                                break;
-                            // Negative Z
-                            case NORTH:
-                                corner1 = blockPos.add(-r, -r, 0);
-                                corner2 = blockPos.add(r, r, -2 * r);
-                                break;
-                            // Positive Z
-                            case SOUTH:
-                                corner1 = blockPos.add(-r, -r, 0);
-                                corner2 = blockPos.add(r, r, 2 * r);
-                                break;
-                            // Positive X
-                            case EAST:
-                                corner1 = blockPos.add(0, -r, -r);
-                                corner2 = blockPos.add(-2 * r, r, r);
-                                break;
-                            // Negative X
-                            case WEST:
-                                corner1 = blockPos.add(0, -r, -r);
-                                corner2 = blockPos.add(2 * r, r, r);
-                                break;
-                        }
-                        dwarf.brain.taskSelector.interrupt(new MineCubeVolumeTask(dwarf, world, corner1, corner2));
+                    case PLACE_BLOCK:
+                        dwarf.brain.taskManager.interrupt(TaskComposer.sequence(
+                                new WalkToPositionTask(dwarf, blockPos.offset(context.getSide()), 2, 1),
+                                new PlaceBlockTask(dwarf, blockPos.offset(context.getSide()), Blocks.COBBLESTONE.getDefaultState())
+                        ));
+                        break;
+                    case BUILD_MINESHAFT:
+                        dwarf.brain.taskManager.interrupt(new TaskGenerator(() -> dwarfGroup.requestTask(dwarf)));
+                        break;
+                    default:
                         break;
                 }
             });
@@ -155,12 +126,14 @@ public class DwarfCommandItem extends Item {
         switch (getCommand(stack)) {
             case WALK:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "walk"));
+            case JUMP:
+                return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "jump"));
             case PLACE_BLOCK:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "place_block"));
             case BREAK_BLOCK:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "break_block"));
-            case MINE_VOLUME:
-                return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "mine_volume"));
+            case BUILD_MINESHAFT:
+                return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "build_mineshaft"));
             case CREATE_GROUP:
                 return Util.createTranslationKey("dwarfcommand", new Identifier(DwarvesMod.MODID, "create_group"));
             default:
@@ -170,9 +143,10 @@ public class DwarfCommandItem extends Item {
 
     public enum Command {
         WALK,
+        JUMP,
         PLACE_BLOCK,
         BREAK_BLOCK,
-        MINE_VOLUME,
+        BUILD_MINESHAFT,
         CREATE_GROUP
     }
 }

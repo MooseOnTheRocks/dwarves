@@ -2,20 +2,15 @@ package dev.foltz.dwarves.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.sun.javafx.sg.prism.NodePath;
-import dev.foltz.dwarves.entity.ai.path.Path;
-import dev.foltz.dwarves.entity.ai.path.PathNode;
+import dev.foltz.dwarves.entity.path.PathNode;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -40,20 +35,24 @@ public class PathRenderer {
         Box box = player.getBoundingBox().expand(20);
         List<DwarfEntity> nearbyDwarves = world.getEntitiesByClass(DwarfEntity.class, box, entity -> true);
         nearbyDwarves.forEach(dwarf -> {
-            Path path = null;//dwarf.brain.currentPath;
-            if (path != null) {
+            dwarf.getPath().ifPresent(path -> {
+                if (path == null) return;
                 for (PathNode node : path.pathNodes) {
-                    BlockPos pos = node.blockPos;
-                    renderCross(camera, world, pos, 0x0000ff, ShapeContext.of(dwarf));
+                    BlockPos pos = node.pos;
+                    switch (node.type) {
+                        case WALK_TO:
+                            renderCross(camera, world, pos, 0x0000ff, ShapeContext.of(dwarf));
+                            break;
+                        case PLACE_BLOCK:
+                            renderCross(camera, world, pos, 0x00ff00, ShapeContext.of(dwarf));
+                            break;
+                        default:
+                            renderCross(camera, world, pos, 0xff0000, ShapeContext.of(dwarf));
+                            break;
+                    }
                 }
-            }
-//            Optional<BlockPos> maybeBlock = dwarf.getDataTracker().get(dwarf.brain.BLOCK_WALKING_TO);
-//            maybeBlock.ifPresent(pos -> {
-//                renderCross(camera, world, pos, 0xff0000, ShapeContext.of(dwarf));
-//                renderCross(camera, world, dwarf.getBlockPos(), 0x00ff00, ShapeContext.of(dwarf));
-//            });
+            });
         });
-//        renderCross(camera, world, pos, 0xff0000, shapeContext);
         GL11.glEnd();
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
@@ -63,9 +62,9 @@ public class PathRenderer {
     public static void renderCross(Camera camera, World world, BlockPos pos, int color, ShapeContext shapeContext) {
         double d0 = camera.getPos().x;
         double d1 = camera.getPos().y - .005D;
-        VoxelShape upperOutlineShape = world.getBlockState(pos).getCollisionShape(world, pos, shapeContext);
-        if (!upperOutlineShape.isEmpty())
-            d1 -= upperOutlineShape.getMax(Direction.Axis.Y);
+//        VoxelShape upperOutlineShape = world.getBlockState(pos).getCollisionShape(world, pos, shapeContext);
+//        if (!upperOutlineShape.isEmpty())
+//            d1 -= upperOutlineShape.getMax(Direction.Axis.Y);
         double d2 = camera.getPos().z;
 
         int red = (color >> 16) & 255;

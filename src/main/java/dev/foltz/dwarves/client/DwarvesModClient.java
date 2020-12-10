@@ -2,22 +2,15 @@ package dev.foltz.dwarves.client;
 
 import dev.foltz.dwarves.client.entity.render.DwarfEntityRenderer;
 import dev.foltz.dwarves.DwarvesMod;
-import dev.foltz.dwarves.entity.ai.path.Path;
+import dev.foltz.dwarves.entity.path.Path;
 import dev.foltz.dwarves.entity.dwarf.DwarfEntity;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DwarvesModClient implements ClientModInitializer {
@@ -30,7 +23,7 @@ public class DwarvesModClient implements ClientModInitializer {
 
         ClientSidePacketRegistry.INSTANCE.register(DwarvesMod.TRANSFER_PATH_ID, (context, data) -> {
             int entityId = data.readInt();
-            Path path = Path.read(data);
+            Path path = Path.readStatic(data);
             context.getTaskQueue().execute(() -> {
                 PlayerEntity player = context.getPlayer();
                 World world = player.world;
